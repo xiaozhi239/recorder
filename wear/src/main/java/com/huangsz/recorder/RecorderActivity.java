@@ -1,4 +1,4 @@
-package recorder.android.huangsz.com.recorder;
+package com.huangsz.recorder;
 
 import android.app.Activity;
 import android.os.Bundle;

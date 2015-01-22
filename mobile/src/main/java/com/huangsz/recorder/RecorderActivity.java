@@ -1,21 +1,18 @@
-package recorder.android.huangsz.com.recorder;
+package com.huangsz.recorder;
 
 import java.util.Locale;
 
 import android.net.Uri;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class RecorderActivity extends ActionBarActivity implements TrackFragment.OnFragmentInteractionListener {
+public class RecorderActivity extends BaseActionBarActivity implements RecorderFragment.OnFragmentInteractionListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -46,29 +43,6 @@ public class RecorderActivity extends ActionBarActivity implements TrackFragment
         mViewPager.setAdapter(mSectionsPagerAdapter);
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_recorder, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
     @Override
     public void onFragmentInteraction(Uri uri) {
         // nothing to do here
@@ -80,6 +54,8 @@ public class RecorderActivity extends ActionBarActivity implements TrackFragment
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
+        private static final int PAGE_COUNT = 2;
+
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
@@ -89,15 +65,14 @@ public class RecorderActivity extends ActionBarActivity implements TrackFragment
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
             if (position == 0) {
-                return TrackFragment.newInstance("nothing", "nothing");
+                return RecorderFragment.newInstance("nothing", "nothing");
             }
             return PlaceholderFragment.newInstance(position + 1);
         }
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
-            return 2;
+            return PAGE_COUNT;
         }
 
         @Override
@@ -143,8 +118,7 @@ public class RecorderActivity extends ActionBarActivity implements TrackFragment
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_recorder, container, false);
-            return rootView;
+            return inflater.inflate(R.layout.fragment_recorder, container, false);
         }
     }
 

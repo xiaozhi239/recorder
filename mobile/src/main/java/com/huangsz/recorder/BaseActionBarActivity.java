@@ -1,29 +1,10 @@
-package recorder.android.huangsz.com.recorder;
+package com.huangsz.recorder;
 
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import recorder.android.huangsz.com.recorder.R;
-
-public class EditRecordActivity extends ActionBarActivity {
-
-    public static final String COMMAND = "Command";
-
-    public static final String EDIT_COMMAND = "Edit";
-
-    public static final String NEW_COMMNAD = "New";
-
-    private boolean isEdit;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_record);
-        isEdit = getIntent().getStringExtra(COMMAND).equals(EDIT_COMMAND);
-    }
-
+public abstract class BaseActionBarActivity extends ActionBarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
