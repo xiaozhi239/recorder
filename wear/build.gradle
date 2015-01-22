@@ -6,7 +6,7 @@ android {
     buildToolsVersion "21.1.2"
 
     defaultConfig {
-        applicationId "recorder.android.huangsz.com.myapplication"
+        applicationId "com.huangsz.recorder"
         minSdkVersion 21
         targetSdkVersion 21
         versionCode 1
