@@ -125,7 +125,7 @@ public class RecordProvider extends ContentProvider {
             case ROUTE_RECORDS_ID:
                 String id = uri.getLastPathSegment();
                 count = builder.where(Record.Entry._ID + "=?", id)
-                        .where(selection, selectionArgs)  // just in case user type wrong
+                        .where(selection, selectionArgs)  // just in case user types wrong
                         .delete(db);
                 break;
             default:

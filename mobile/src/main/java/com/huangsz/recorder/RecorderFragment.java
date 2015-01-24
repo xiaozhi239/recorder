@@ -1,20 +1,26 @@
 package com.huangsz.recorder;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Layout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.huangsz.recorder.data.RecordProvider;
 import com.huangsz.recorder.data.utils.RecordDataHelper;
@@ -31,6 +37,8 @@ import java.util.List;
  * create an instance of this fragment.
  */
 public class RecorderFragment extends Fragment {
+
+    private static final String TAG = RecorderFragment.class.getSimpleName();
 
     private OnFragmentInteractionListener mListener;
 
@@ -83,6 +91,13 @@ public class RecorderFragment extends Fragment {
         recordListAdaptor = new RecordListAdaptor(getActivity(), recordListCursor,
                 CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
         recordList.setAdapter(recordListAdaptor);
+        recordList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                onRecordItemLongClick((long) view.getTag());
+                return false;
+            }
+        });
 
         return view;
     }
@@ -114,12 +129,31 @@ public class RecorderFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CREATE_RECORD_REQUEST && resultCode == EditRecordActivity.SIG_SAVE) {
-            Cursor recordListCursor = getActivity().getContentResolver().query(
-                    RecordProvider.CONTENT_URI,
-                    Record.Entry.projection(),
-                    null, null, null);
-            recordListAdaptor.changeCursor(recordListCursor);
+            onRecordChange();
         }
+    }
+
+    private void onRecordItemLongClick(final long recordId) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Delete?").setMessage("Are you sure to delete the record?");
+        builder.setNegativeButton("Cancel", null);
+        builder.setPositiveButton("Delete", new AlertDialog.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Uri uri = RecordProvider.CONTENT_URI.buildUpon()
+                        .appendPath(String.format("%d", recordId)).build();
+                getActivity().getContentResolver().delete(uri, null, null);
+                onRecordChange();
+            }
+        }).show();
+    }
+
+    private void onRecordChange() {
+        Cursor recordListCursor = getActivity().getContentResolver().query(
+                RecordProvider.CONTENT_URI,
+                Record.Entry.projection(),
+                null, null, null);
+        recordListAdaptor.changeCursor(recordListCursor);
     }
 
     /**
@@ -153,10 +187,22 @@ public class RecorderFragment extends Fragment {
 
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
-            TextView name = (TextView)view.findViewById(R.id.record_name);
+            view.setTag(cursor.getLong(0));
+            TextView name = (TextView) view.findViewById(R.id.record_name);
             name.setText(cursor.getString(1));
-            TextView desc = (TextView)view.findViewById(R.id.record_desc);
+            TextView desc = (TextView) view.findViewById(R.id.record_desc);
             desc.setText(cursor.getString(2));
+
+//            view.setOnLongClickListener(new View.OnLongClickListener() {
+//                @Override
+//                public boolean onLongClick(View v) {
+//                    Uri uri = RecordProvider.CONTENT_URI.buildUpon().appendPath("/" + recordId).build();
+//                    getActivity().getContentResolver().delete(uri, null, null);
+//                    Log.i(TAG, "Recorder deleted, id: " + recordId);
+//                    onRecordChange();
+//                    return false;
+//                }
+//            });
         }
     }
 
