@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
 
+import com.huangsz.recorder.data.utils.TimeDataHelper;
 import com.huangsz.recorder.model.Record;
 
 /**
@@ -91,11 +92,16 @@ public class RecordProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
+        values.put(Record.Entry.COLUMN_CREATE_TIME, TimeDataHelper.getCurrentTime());
+        if (!values.containsKey(Record.Entry.COLUMN_DATA)) {
+            values.put(Record.Entry.COLUMN_DATA, "{}");
+        }
         final SQLiteDatabase db = dbHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
         Uri result;
         switch (match) {
             case ROUTE_RECORDS:
+                values.put(Record.Entry.COLUMN_CREATE_TIME, TimeDataHelper.getCurrentTime());
                 long id = db.insertOrThrow(Record.Entry.TABLE, null, values);
                 result = Uri.parse(CONTENT_URI + "/" + id);
                 Log.i(TAG, String.format("Insert record and returned id: %d", id));

@@ -2,15 +2,14 @@ package com.huangsz.recorder;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,15 +17,15 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CursorAdapter;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.huangsz.recorder.data.RecordProvider;
 import com.huangsz.recorder.data.utils.RecordDataHelper;
+import com.huangsz.recorder.data.utils.TimeDataHelper;
 import com.huangsz.recorder.model.Record;
-
-import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -73,6 +72,7 @@ public class RecorderFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_recorder, container, false);
+
         Button addRecordBtn = (Button) view.findViewById(R.id.add_record_btn);
         addRecordBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,6 +96,12 @@ public class RecorderFragment extends Fragment {
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 onRecordItemLongClick((long) view.getTag());
                 return false;
+            }
+        });
+        recordList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                onRecordItemClick((long) view.getTag());
             }
         });
 
@@ -133,6 +139,12 @@ public class RecorderFragment extends Fragment {
         }
     }
 
+    private void onRecordItemClick(final long recordId) {
+        Intent intent = new Intent(getActivity(), RecordDetailActivity.class);
+        intent.putExtra(RecordDetailActivity.KEY_RECORD_ID, recordId);
+        startActivity(intent);
+    }
+
     private void onRecordItemLongClick(final long recordId) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Delete?").setMessage("Are you sure to delete the record?");
@@ -140,9 +152,7 @@ public class RecorderFragment extends Fragment {
         builder.setPositiveButton("Delete", new AlertDialog.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Uri uri = RecordProvider.CONTENT_URI.buildUpon()
-                        .appendPath(String.format("%d", recordId)).build();
-                getActivity().getContentResolver().delete(uri, null, null);
+                RecordDataHelper.deleteRecord(getActivity(), recordId);
                 onRecordChange();
             }
         }).show();
@@ -181,28 +191,47 @@ public class RecorderFragment extends Fragment {
         }
 
         @Override
-        public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        public View newView(final Context context, Cursor cursor, ViewGroup parent) {
             return LayoutInflater.from(context).inflate(R.layout.listitem_record, parent, false);
         }
 
         @Override
-        public void bindView(View view, Context context, Cursor cursor) {
-            view.setTag(cursor.getLong(0));
+        public void bindView(View view, final Context context, Cursor cursor) {
+            final long recordId = cursor.getLong(0);
+            view.setTag(recordId);
+
             TextView name = (TextView) view.findViewById(R.id.record_name);
             name.setText(cursor.getString(1));
             TextView desc = (TextView) view.findViewById(R.id.record_desc);
             desc.setText(cursor.getString(2));
 
-//            view.setOnLongClickListener(new View.OnLongClickListener() {
-//                @Override
-//                public boolean onLongClick(View v) {
-//                    Uri uri = RecordProvider.CONTENT_URI.buildUpon().appendPath("/" + recordId).build();
-//                    getActivity().getContentResolver().delete(uri, null, null);
-//                    Log.i(TAG, "Recorder deleted, id: " + recordId);
-//                    onRecordChange();
-//                    return false;
-//                }
-//            });
+            ImageButton settings = (ImageButton) view.findViewById(R.id.record_setting_btn);
+            settings.setFocusable(false);
+            settings.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(context, "dashabi", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            ImageButton track = (ImageButton) view.findViewById(R.id.record_track_btn);
+            track.setFocusable(false);
+            track.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    trackRecord(recordId, context);
+                }
+            });
+        }
+
+        private void trackRecord(long recordId, Context context) {
+            Record record = RecordDataHelper.getRecord(context, recordId);
+            Log.d(TAG, "recordData: " + record.getData());
+            record.putData(TimeDataHelper.getCurrentData(), TimeDataHelper.getCurrentTime());
+            ContentValues newData = new ContentValues();
+            newData.put(Record.Entry.COLUMN_DATA, record.getData());
+            RecordDataHelper.updateRecord(context, newData, recordId);
+            Toast.makeText(context,"Today's time has been tracked", Toast.LENGTH_LONG).show();
         }
     }
 

@@ -1,7 +1,11 @@
 package com.huangsz.recorder.data.utils;
 
+import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 
+import com.huangsz.recorder.data.RecordProvider;
 import com.huangsz.recorder.model.Record;
 
 import java.util.ArrayList;
@@ -12,20 +16,25 @@ import java.util.List;
  */
 public class RecordDataHelper {
 
-    /**
-     * Note that cursor should use the projection of
-     * {@link com.huangsz.recorder.model.Record.Entry#projection()}
-     * @param cursor
-     * @return
-     */
-    public static List<Record> getAllRecords(Cursor cursor) {
-        List<Record> records = new ArrayList<>();
+    public static Record getRecord(Context context, long recordId) {
+        Uri uri = getRecordUri(recordId);
+        Cursor cursor = context.getContentResolver().query(uri,
+                Record.Entry.projection(), null, null, null);
         cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            records.add(cursor2Record(cursor));
-            cursor.moveToNext();
-        }
-        return records;
+        return cursor2Record(cursor);
+    }
+
+    public static void updateRecord(Context context, ContentValues newData, long recordId) {
+        context.getContentResolver().update(getRecordUri(recordId), newData, null, null);
+    }
+
+    public static void deleteRecord(Context context, long recordId) {
+        context.getContentResolver().delete(getRecordUri(recordId), null, null);
+    }
+
+    private static Uri getRecordUri(long recordId) {
+        return RecordProvider.CONTENT_URI.buildUpon()
+                .appendPath(String.format("%d", recordId)).build();
     }
 
     private static Record cursor2Record(Cursor cursor) {

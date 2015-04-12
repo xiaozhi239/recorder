@@ -10,7 +10,9 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="info_no_tracker_now">There\'s nothing to track today, add a new one?</string>
     <string name="add_record">Add</string>
-  <string name="save">Save</string>
-  <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="title_activity_record_detail">RecordDetailActivity</string>
+    <string name="title_activity_test">TestActivity</string>
 
 </resources>
