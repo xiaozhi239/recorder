@@ -76,9 +76,10 @@ public class Record {
     }
 
     /**
-     * if the key already exists, then the value will be updated to the new one
-     * @param key
-     * @param value
+     * Put the data into a record,
+     * if the key already exists, then the value will be updated to the new one.
+     * @param key Is date for now.
+     * @param value Is time for now.
      */
     public void putData(String key, String value) {
         try {
@@ -88,6 +89,11 @@ public class Record {
         }
     }
 
+    /**
+     * Get the data in record in a List<Pair> format.
+     * The data format now is [{"date":"time"}, ...]
+     * @return
+     */
     public List<Pair<String, String>> getDataInList() {
         List<Pair<String, String>> entries = new ArrayList<>();
         Iterator<String> iterator = data.keys();
@@ -99,7 +105,7 @@ public class Record {
         Collections.sort(entries, new Comparator<Pair<String, String>>() {
             @Override
             public int compare(Pair<String, String> lhs, Pair<String, String> rhs) {
-                return lhs.first.compareTo(rhs.second);
+                return lhs.first.compareTo(rhs.first);
             }
         });
         return entries;
